@@ -1,0 +1,515 @@
+
+#include <bits/stdc++.h>
+using namespace std;
+
+// ==========================================
+// 1. KHAI BAO CAU TRUC DU LIEU
+// ==========================================
+
+// Use Case 1: Quan ly khach hang
+struct KhachHang {
+    string maKH;
+    string hoTen;
+    string diaChi;
+    string soDienThoai;
+    string CCCD;
+    string email;
+};
+
+// Use Case 2: Dang ky dich vu Internet
+struct DangKyDichVu {
+    string maDK;
+    string maKH;
+    string maGoi;
+    string ngayDangKy;
+    string trangThai;
+};
+
+// Use Case 3: Quan ly goi cuoc
+struct GoiCuoc {
+    string maGoi;
+    string tenGoi;
+    int tocDo;
+    double giaCuoc;
+    int thoiHan;
+};
+
+// Use Case 5: Quan ly hop dong
+struct HopDong {
+    string maHD;
+    string maKH;
+    string maGoi;
+    string ngayKy;
+    string ngayHetHan;
+    string trangThai;
+};
+
+// Use Case 7: Quan ly thanh toan
+struct ThanhToan {
+    string maTT;
+    string maKH;
+    string maHD;
+    double soTien;
+    string ngayThanhToan;
+    string phuongThuc;
+    string trangThai;
+};
+
+// Use Case 8: Quan ly hoa don
+struct HoaDon {
+    string maHD;
+    string maKH;
+    double tongTien;
+    string kyThanhToan;
+    string trangThai;
+};
+
+// Use Case 9: Quan ly su co
+struct SuCo {
+    string maSC;
+    string maKH;
+    string moTa;
+    string ngayBao;
+    string trangThai;
+};
+
+// Use Case 10: Ho tro ky thuat
+struct HoTroKyThuat {
+    string maHT;
+    string maSC;
+    string maNhanVien;
+    string ngayPhanCong;
+    string ketQuaXuLy;
+};
+
+// ==========================================
+// 2. KHAI BAO CAC DANH SACH DU LIEU
+// ==========================================
+
+vector<KhachHang> dsKhachHang;
+vector<DangKyDichVu> dsDangKy;
+vector<GoiCuoc> dsGoiCuoc;
+vector<HopDong> dsHopDong;
+vector<ThanhToan> dsThanhToan;
+vector<HoaDon> dsHoaDon;
+vector<SuCo> dsSuCo;
+vector<HoTroKyThuat> dsHoTro;
+
+// ==========================================
+// 3. USE CASE 1: QUAN LY KHACH HANG
+// ==========================================
+
+void themKhachHang() {
+    // TODO: Nhap thong tin khach hang
+    // TODO: Kiem tra ma khach hang trung
+    // TODO: Them vao dsKhachHang
+}
+
+void hienThiKhachHang() {
+    // TODO: Duyet dsKhachHang va in thong tin
+}
+
+void timKhachHang() {
+    // TODO: Tim theo maKH hoac so dien thoai
+}
+
+void suaKhachHang() {
+    // TODO: Tim khach hang va cap nhat thong tin
+}
+
+void xoaKhachHang() {
+    // TODO: Tim khach hang va xoa neu du dieu kien
+}
+
+void menuKhachHang() {
+    int chon;
+    do {
+        cout << "\n--- QUAN LY KHACH HANG ---\n";
+        cout << "1. Them khach hang\n";
+        cout << "2. Hien thi khach hang\n";
+        cout << "3. Tim khach hang\n";
+        cout << "4. Sua khach hang\n";
+        cout << "5. Xoa khach hang\n";
+        cout << "0. Quay lai\n";
+        cout << "Chon: ";
+        cin >> chon;
+
+        switch (chon) {
+            case 1: themKhachHang(); break;
+            case 2: hienThiKhachHang(); break;
+            case 3: timKhachHang(); break;
+            case 4: suaKhachHang(); break;
+            case 5: xoaKhachHang(); break;
+        }
+    } while (chon != 0);
+}
+
+// ==========================================
+// 4. USE CASE 2: DANG KY DICH VU INTERNET
+// ==========================================
+
+void dangKyDichVu() {
+    // TODO: Nhap ma khach hang va ma goi cuoc
+    // TODO: Kiem tra khach hang, goi cuoc ton tai
+    // TODO: Tao yeu cau dang ky
+}
+
+void hienThiDangKy() {
+    // TODO: Hien thi danh sach dang ky
+}
+
+void xuLyDangKy() {
+    // TODO: Tim yeu cau dang ky
+    // TODO: Cap nhat trang thai xu ly
+    // TODO: Neu duoc duyet, co the tao hop dong
+}
+
+void menuDangKy() {
+    int chon;
+    do {
+        cout << "\n--- DANG KY DICH VU ---\n";
+        cout << "1. Dang ky dich vu\n";
+        cout << "2. Hien thi dang ky\n";
+        cout << "3. Xu ly yeu cau dang ky\n";
+        cout << "0. Quay lai\n";
+        cout << "Chon: ";
+        cin >> chon;
+
+        switch (chon) {
+            case 1: dangKyDichVu(); break;
+            case 2: hienThiDangKy(); break;
+            case 3: xuLyDangKy(); break;
+        }
+    } while (chon != 0);
+}
+
+// ==========================================
+// 5. USE CASE 3: QUAN LY GOI CUOC
+// ==========================================
+
+void themGoiCuoc() {
+    // TODO: Nhap ma goi, ten goi, toc do,
+    // gia cuoc va thoi han
+}
+
+void hienThiGoiCuoc() {
+    // TODO: Hien thi danh sach goi cuoc
+}
+
+void timGoiCuoc() {
+    // TODO: Tim theo ma goi hoac ten goi
+}
+
+void suaGoiCuoc() {
+    // TODO: Cap nhat thong tin goi cuoc
+}
+
+void xoaGoiCuoc() {
+    // TODO: Xoa goi cuoc neu khong con rang buoc
+}
+
+void menuGoiCuoc() {
+    int chon;
+    do {
+        cout << "\n--- QUAN LY GOI CUOC ---\n";
+        cout << "1. Them goi cuoc\n";
+        cout << "2. Hien thi goi cuoc\n";
+        cout << "3. Tim goi cuoc\n";
+        cout << "4. Sua goi cuoc\n";
+        cout << "5. Xoa goi cuoc\n";
+        cout << "0. Quay lai\n";
+        cout << "Chon: ";
+        cin >> chon;
+
+        switch (chon) {
+            case 1: themGoiCuoc(); break;
+            case 2: hienThiGoiCuoc(); break;
+            case 3: timGoiCuoc(); break;
+            case 4: suaGoiCuoc(); break;
+            case 5: xoaGoiCuoc(); break;
+        }
+    } while (chon != 0);
+}
+
+// ==========================================
+// 6. USE CASE 4: DANG KY / CHUYEN DOI GOI CUOC
+// ==========================================
+
+void chuyenDoiGoiCuoc() {
+    // TODO: Nhap ma khach hang va goi cuoc moi
+    // TODO: Kiem tra hop dong hien tai
+    // TODO: Cap nhat goi cuoc sau khi duoc chap nhan
+}
+
+void menuChuyenDoi() {
+    int chon;
+    do {
+        cout << "\n--- CHUYEN DOI GOI CUOC ---\n";
+        cout << "1. Dang ky goi moi\n";
+        cout << "2. Chuyen doi goi cuoc\n";
+        cout << "0. Quay lai\n";
+        cout << "Chon: ";
+        cin >> chon;
+
+        switch (chon) {
+            case 1: dangKyDichVu(); break;
+            case 2: chuyenDoiGoiCuoc(); break;
+        }
+    } while (chon != 0);
+}
+
+// ==========================================
+// 7. USE CASE 5: QUAN LY HOP DONG
+// ==========================================
+
+void taoHopDong() {
+    // TODO: Tao hop dong cho khach hang
+}
+
+void hienThiHopDong() {
+    // TODO: Hien thi danh sach hop dong
+}
+
+void timHopDong() {
+    // TODO: Tim hop dong theo maHD hoac maKH
+}
+
+void capNhatHopDong() {
+    // TODO: Cap nhat trang thai, ngay het han
+}
+
+void menuHopDong() {
+    int chon;
+    do {
+        cout << "\n--- QUAN LY HOP DONG ---\n";
+        cout << "1. Tao hop dong\n";
+        cout << "2. Hien thi hop dong\n";
+        cout << "3. Tim hop dong\n";
+        cout << "4. Cap nhat hop dong\n";
+        cout << "0. Quay lai\n";
+        cout << "Chon: ";
+        cin >> chon;
+
+        switch (chon) {
+            case 1: taoHopDong(); break;
+            case 2: hienThiHopDong(); break;
+            case 3: timHopDong(); break;
+            case 4: capNhatHopDong(); break;
+        }
+    } while (chon != 0);
+}
+
+// ==========================================
+// 8. USE CASE 6: GIA HAN DICH VU
+// ==========================================
+
+void giaHanDichVu() {
+    // TODO: Nhap ma hop dong
+    // TODO: Kiem tra hop dong con hieu luc
+    // TODO: Cap nhat ngay het han va thoi han gia han
+}
+
+void menuGiaHan() {
+    int chon;
+    do {
+        cout << "\n--- GIA HAN DICH VU ---\n";
+        cout << "1. Gia han dich vu\n";
+        cout << "0. Quay lai\n";
+        cout << "Chon: ";
+        cin >> chon;
+
+        if (chon == 1) {
+            giaHanDichVu();
+        }
+    } while (chon != 0);
+}
+
+// ==========================================
+// 9. USE CASE 7: QUAN LY THANH TOAN
+// ==========================================
+
+void taoThanhToan() {
+    // TODO: Nhap ma hoa don/hop dong va so tien
+    // TODO: Kiem tra so tien can thanh toan
+    // TODO: Ghi nhan giao dich
+}
+
+void hienThiThanhToan() {
+    // TODO: Hien thi lich su thanh toan
+}
+
+void kiemTraThanhToan() {
+    // TODO: Kiem tra giao dich thanh cong hay that bai
+}
+
+void menuThanhToan() {
+    int chon;
+    do {
+        cout << "\n--- QUAN LY THANH TOAN ---\n";
+        cout << "1. Tao giao dich thanh toan\n";
+        cout << "2. Hien thi thanh toan\n";
+        cout << "3. Kiem tra giao dich\n";
+        cout << "0. Quay lai\n";
+        cout << "Chon: ";
+        cin >> chon;
+
+        switch (chon) {
+            case 1: taoThanhToan(); break;
+            case 2: hienThiThanhToan(); break;
+            case 3: kiemTraThanhToan(); break;
+        }
+    } while (chon != 0);
+}
+
+// ==========================================
+// 10. USE CASE 8: QUAN LY HOA DON CUOC
+// ==========================================
+
+void lapHoaDon() {
+    // TODO: Tao hoa don theo ky thanh toan
+    // TODO: Tinh tien va gan hoa don cho khach hang
+}
+
+void hienThiHoaDon() {
+    // TODO: Hien thi danh sach hoa don
+}
+
+void traCuuHoaDon() {
+    // TODO: Tim hoa don theo maHD hoac maKH
+}
+
+void menuHoaDon() {
+    int chon;
+    do {
+        cout << "\n--- QUAN LY HOA DON ---\n";
+        cout << "1. Lap hoa don\n";
+        cout << "2. Hien thi hoa don\n";
+        cout << "3. Tra cuu hoa don\n";
+        cout << "0. Quay lai\n";
+        cout << "Chon: ";
+        cin >> chon;
+
+        switch (chon) {
+            case 1: lapHoaDon(); break;
+            case 2: hienThiHoaDon(); break;
+            case 3: traCuuHoaDon(); break;
+        }
+    } while (chon != 0);
+}
+
+// ==========================================
+// 11. USE CASE 9: QUAN LY SU CO
+// ==========================================
+
+void baoSuCo() {
+    // TODO: Tiep nhan yeu cau bao hong/mat mang
+}
+
+void hienThiSuCo() {
+    // TODO: Hien thi danh sach su co
+}
+
+void capNhatSuCo() {
+    // TODO: Cap nhat trang thai xu ly su co
+}
+
+void menuSuCo() {
+    int chon;
+    do {
+        cout << "\n--- QUAN LY SU CO ---\n";
+        cout << "1. Tiep nhan bao su co\n";
+        cout << "2. Hien thi su co\n";
+        cout << "3. Cap nhat su co\n";
+        cout << "0. Quay lai\n";
+        cout << "Chon: ";
+        cin >> chon;
+
+        switch (chon) {
+            case 1: baoSuCo(); break;
+            case 2: hienThiSuCo(); break;
+            case 3: capNhatSuCo(); break;
+        }
+    } while (chon != 0);
+}
+
+// ==========================================
+// 12. USE CASE 10: HO TRO KY THUAT
+// ==========================================
+
+void phanCongKyThuat() {
+    // TODO: Gan nhan vien ky thuat cho su co
+}
+
+void theoDoiXuLy() {
+    // TODO: Theo doi tien do xu ly yeu cau
+}
+
+void capNhatKetQua() {
+    // TODO: Luu ket qua xu ly va dong yeu cau
+}
+
+void menuHoTroKyThuat() {
+    int chon;
+    do {
+        cout << "\n--- HO TRO KY THUAT ---\n";
+        cout << "1. Phan cong nhan vien\n";
+        cout << "2. Theo doi xu ly\n";
+        cout << "3. Cap nhat ket qua\n";
+        cout << "0. Quay lai\n";
+        cout << "Chon: ";
+        cin >> chon;
+
+        switch (chon) {
+            case 1: phanCongKyThuat(); break;
+            case 2: theoDoiXuLy(); break;
+            case 3: capNhatKetQua(); break;
+        }
+    } while (chon != 0);
+}
+
+// ==========================================
+// 13. MENU CHINH
+// ==========================================
+
+int main() {
+    int chon;
+
+    do {
+        cout << "\n========== QUAN LY INTERNET FTTH ==========\n";
+        cout << "1. Quan ly khach hang\n";
+        cout << "2. Dang ky dich vu Internet\n";
+        cout << "3. Quan ly goi cuoc\n";
+        cout << "4. Dang ky / chuyen doi goi cuoc\n";
+        cout << "5. Quan ly hop dong\n";
+        cout << "6. Gia han dich vu\n";
+        cout << "7. Quan ly thanh toan\n";
+        cout << "8. Quan ly hoa don cuoc\n";
+        cout << "9. Quan ly su co\n";
+        cout << "10. Ho tro ky thuat\n";
+        cout << "0. Thoat chuong trinh\n";
+        cout << "===========================================\n";
+        cout << "Nhap lua chon: ";
+        cin >> chon;
+
+        switch (chon) {
+            case 1: menuKhachHang(); break;
+            case 2: menuDangKy(); break;
+            case 3: menuGoiCuoc(); break;
+            case 4: menuChuyenDoi(); break;
+            case 5: menuHopDong(); break;
+            case 6: menuGiaHan(); break;
+            case 7: menuThanhToan(); break;
+            case 8: menuHoaDon(); break;
+            case 9: menuSuCo(); break;
+            case 10: menuHoTroKyThuat(); break;
+            case 0:
+                cout << "Ket thuc chuong trinh!\n";
+                break;
+            default:
+                cout << "Lua chon khong hop le!\n";
+        }
+
+    } while (chon != 0);
+
+    return 0;
+}
