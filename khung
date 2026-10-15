@@ -1,271 +1,270 @@
-#include <bits/stdc++.h>
-#include <filesystem>
+/*
+ * Bai tap lon: He thong Quan ly Dich vu FTTH
+ * Phu trach: UC7 (Quan ly Thanh toan) & UC8 (Quan ly Hoa don cuoc)
+ */
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <vector>
+#include <string>
+#include <stdexcept>
+
 using namespace std;
 
-/*
-    BTL KY THUAT LAP TRINH - QUAN LY DICH VU INTERNET FTTH
-    DAY LA BO KHUNG CHUNG DE CAC THANH VIEN PHAT TRIEN USE CASE.
+/* --- CAC HAM TIEN ICH & KIEM TRA DU LIEU (INLINE) --- */
+inline string readLine(const string& prompt) {
+    cout << prompt;
+    string s;
+    getline(cin >> ws, s);
+    return s;
+}
 
-    Quy uoc:
-    - Khung chung: Entity, Repository<T>, doc/ghi file, menu chinh, nhap lua chon.
-    - Moi thanh vien: hoan thien validate(), labels(), cac ham nghiep vu va rang buoc
-      tham chieu cua 2 use case duoc phan cong.
-    - Khong coi cac ham TODO la chuc nang da hoan thanh. Truoc khi nop, phai cai dat
-      va kiem thu day du CRUD cho tung doi tuong.
-*/
+inline int readChoice(const string& prompt, int minVal, int maxVal) {
+    while (true) {
+        try {
+            int c = stoi(readLine(prompt));
+            if (c >= minVal && c <= maxVal) return c;
+        } catch (...) {}
+        cout << "Lua chon khong hop le, vui long nhap lai.\n";
+    }
+}
 
-namespace FTTH {
+inline bool isValidCode(const string& s, const string& pre) {
+    if (s.size() <= pre.size() || s.substr(0, pre.size()) != pre) return false;
+    for (size_t i = pre.size(); i < s.size(); ++i)
+        if (!isdigit(s[i])) return false;
+    return true;
+}
 
-// ============================================================
-// 1. LOP CO SO TRUU TUONG DUNG CHUNG
-// ============================================================
+inline bool isValidDate(const string& s) {
+    if (s.size() != 10 || s[2] != '/' || s[5] != '/') return false;
+    for (int i = 0; i < 10; ++i)
+        if (i != 2 && i != 5 && !isdigit(s[i])) return false;
+    int d = stoi(s.substr(0, 2)), m = stoi(s.substr(3, 2)), y = stoi(s.substr(6, 4));
+    if (y < 2000 || y > 2100 || m < 1 || m > 12 || d < 1) return false;
+    int days[] = {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    if ((y % 4 == 0 && y % 100 != 0) || (y % 400 == 0)) days[2] = 29;
+    return d <= days[m];
+}
+
+inline bool isPositiveNum(const string& s) {
+    try {
+        size_t idx = 0;
+        double v = stod(s, &idx);
+        return !s.empty() && idx == s.size() && v > 0;
+    } catch (...) { return false; }
+}
+
+/* --- LOP CO SO TRUU TUONG ENTITY --- */
 class Entity {
-private:
-    string id_;
-
 protected:
-    vector<string> fields_;
+    string id_, type_;
+    vector<string> fields_, labels_;
 
 public:
-    virtual ~Entity() = default;
+    Entity(string type = "", vector<string> labels = {})
+        : id_(""), type_(type), fields_(labels.size(), ""), labels_(labels) {}
+    virtual ~Entity() {}
 
-    // Getter/setter ma dinh danh; khong cho phep ma rong hoac chua ky tu phan cach.
-    const string& getId() const { return id_; }
+    string getId() const { return id_; }
+    const vector<string>& getLabels() const { return labels_; }
 
     void setId(const string& id) {
         if (id.empty() || id.find('|') != string::npos)
-            throw invalid_argument("Ma dinh danh rong hoac chua ky tu |.");
+            throw invalid_argument("Ma dinh danh rong hoac chua ky tu '|'.");
         id_ = id;
     }
 
-    // Cac ham thuan ao giup Entity la lop truu tuong.
-    virtual string typeName() const = 0;
-    virtual vector<string> fieldNames() const = 0;
+    virtual void validate() const = 0; // Ham thuan ao
 
-    // Moi thanh vien can bo sung quy tac kiem tra rieng cho doi tuong.
-    virtual void validate() const {
-        if (id_.empty()) throw invalid_argument("Ma dinh danh khong duoc de trong.");
-        for (const auto& value : fields_) {
-            if (value.find('|') != string::npos)
-                throw invalid_argument("Du lieu khong duoc chua ky tu |.");
-        }
-    }
+    /* Da nang hoa toan tu == de so sanh ma dinh danh */
+    bool operator==(const string& otherId) const { return id_ == otherId; }
 
-    // Khung nhap/sua chung. Thanh vien co the ghi de neu can kieu du lieu dac thu.
     virtual void inputNew() {
-        setId(readLine("Nhap ma " + typeName() + ": "));
-        fields_.clear();
-
-        for (const auto& label : fieldNames()) {
-            string value = readLine(label + ": ");
-            fields_.push_back(value);
-        }
-        validate(); // TODO theo tung use case: kiem tra so, ngay, email, trang thai...
+        setId(readLine("Nhap ma " + type_ + ": "));
+        for (size_t i = 0; i < labels_.size(); ++i)
+            fields_[i] = readLine(labels_[i] + ": ");
+        validate();
     }
 
     virtual void updateFields() {
-        const auto labels = fieldNames();
-        for (size_t i = 0; i < fields_.size() && i < labels.size(); ++i) {
-            cout << labels[i] << " [" << fields_[i]
-                 << "] (Enter de giu nguyen): ";
-            string value;
-            getline(cin, value);
-            if (!value.empty()) fields_[i] = value;
+        for (size_t i = 0; i < labels_.size(); ++i) {
+            cout << labels_[i] << " [" << fields_[i] << "] (Enter de giu nguyen): ";
+            string v;
+            getline(cin, v);
+            if (!v.empty()) fields_[i] = v;
         }
-        validate(); // Ma dinh danh khong duoc sua trong thao tac cap nhat.
+        validate();
     }
 
     virtual void displayRow() const {
         cout << left << setw(14) << id_;
-        for (const auto& value : fields_) cout << left << setw(22) << value;
+        for (size_t i = 0; i < fields_.size(); ++i)
+            cout << left << setw(22) << fields_[i];
         cout << '\n';
     }
 
-    virtual void displayDetail() const {
-        cout << "Ma: " << id_ << '\n';
-        const auto labels = fieldNames();
-        for (size_t i = 0; i < fields_.size() && i < labels.size(); ++i)
-            cout << labels[i] << ": " << fields_[i] << '\n';
-    }
-
-    // Dinh dang file van ban: ma|truong1|truong2...
     string serialize() const {
-        validate();
-        string line = id_;
-        for (const auto& value : fields_) line += "|" + value;
-        return line;
+        string s = id_;
+        for (size_t i = 0; i < fields_.size(); ++i) s += "|" + fields_[i];
+        return s;
     }
 
     bool parse(const string& line) {
-        stringstream stream(line);
+        stringstream ss(line);
+        string p;
         vector<string> parts;
-        string part;
-        while (getline(stream, part, '|')) parts.push_back(part);
-
-        if (parts.size() != fieldNames().size() + 1 || parts.empty())
-            return false;
-
+        while (getline(ss, p, '|')) parts.push_back(p);
+        if (parts.size() != labels_.size() + 1) return false;
         try {
             setId(parts[0]);
-            fields_.assign(parts.begin() + 1, parts.end());
+            for (size_t i = 0; i < labels_.size(); ++i) fields_[i] = parts[i + 1];
             validate();
             return true;
-        } catch (...) {
-            return false;
-        }
-    }
-
-    static string readLine(const string& prompt) {
-        cout << prompt;
-        string value;
-        getline(cin >> ws, value);
-        return value;
+        } catch (...) { return false; }
     }
 };
 
-// ============================================================
-// 2. CAC LOP THUC THE - KHAI BAO TRUONG, CHUA VIET NGHIEP VU
-//    Moi thanh vien bo sung validate() va logic use case cua minh.
-// ============================================================
-#define DEFINE_ENTITY(ClassName, DisplayName, ...)                 \
-class ClassName : public Entity {                                  \
-public:                                                            \
-    string typeName() const override { return DisplayName; }       \
-    vector<string> fieldNames() const override { return {__VA_ARGS__}; } \
-    /* TODO: override validate() de kiem tra du lieu rieng. */      \
+/* --- CAC LOP THUC THE CON --- */
+class SimpleEntity : public Entity {
+public:
+    SimpleEntity(string type, vector<string> labels) : Entity(type, labels) {}
+    void validate() const override {
+        for (size_t i = 0; i < fields_.size(); ++i)
+            if (fields_[i].find('|') != string::npos)
+                throw invalid_argument("Du lieu khong duoc chua ky tu '|'.");
+    }
 };
 
-DEFINE_ENTITY(Customer, "Khach hang",
-    "Ho ten", "Dia chi", "So dien thoai", "CCCD", "Email")
+class Customer : public SimpleEntity {
+public: Customer() : SimpleEntity("Khach hang", {"Ho ten", "Dia chi", "So dien thoai", "CCCD", "Email"}) {}
+};
+class Registration : public SimpleEntity {
+public: Registration() : SimpleEntity("Dang ky dich vu", {"Ma khach hang", "Ma goi cuoc", "Ngay dang ky", "Trang thai"}) {}
+};
+class Plan : public SimpleEntity {
+public: Plan() : SimpleEntity("Goi cuoc", {"Ten goi", "Toc do Mbps", "Gia cuoc", "Thoi han thang"}) {}
+};
+class PlanChange : public SimpleEntity {
+public: PlanChange() : SimpleEntity("Chuyen doi goi cuoc", {"Ma khach hang", "Goi cu", "Goi moi", "Ngay yeu cau", "Trang thai"}) {}
+};
+class Contract : public SimpleEntity {
+public: Contract() : SimpleEntity("Hop dong", {"Ma khach hang", "Ma goi", "Ngay ky", "Ngay het han", "Trang thai"}) {}
+};
+class Renewal : public SimpleEntity {
+public: Renewal() : SimpleEntity("Gia han dich vu", {"Ma hop dong", "Ngay gia han", "So thang", "So tien"}) {}
+};
+class Incident : public SimpleEntity {
+public: Incident() : SimpleEntity("Su co Internet", {"Ma khach hang", "Thoi diem bao", "Mo ta", "Muc do", "Trang thai"}) {}
+};
+class Support : public SimpleEntity {
+public: Support() : SimpleEntity("Ho tro ky thuat", {"Ma su co", "Ma nhan vien", "Ngay tiep nhan", "Ket qua", "Trang thai"}) {}
+};
 
-DEFINE_ENTITY(Registration, "Dang ky dich vu",
-    "Ma khach hang", "Ma goi cuoc", "Ngay dang ky", "Trang thai")
+class Invoice : public Entity {
+public:
+    Invoice() : Entity("Hoa don cuoc", {
+        "Ma khach hang", "Ky cuoc", "Ngay lap", "Tong tien", "Trang thai"
+    }) {}
 
-DEFINE_ENTITY(Plan, "Goi cuoc",
-    "Ten goi", "Toc do Mbps", "Gia cuoc", "Thoi han thang")
+    string getCustomerId() const { return fields_[0]; }
+    string getStatus() const { return fields_[4]; }
+    void setStatus(const string& st) { fields_[4] = st; }
 
-DEFINE_ENTITY(PlanChange, "Chuyen doi goi cuoc",
-    "Ma khach hang", "Goi cu", "Goi moi", "Ngay yeu cau", "Trang thai")
+    void validate() const override {
+        if (!isValidCode(id_, "HD")) throw invalid_argument("Ma hoa don phai co dang HDxxx.");
+        if (fields_[0].empty()) throw invalid_argument("Ma khach hang khong duoc trong.");
+        if (!isValidDate("01/" + fields_[1])) throw invalid_argument("Ky cuoc khong hop le (MM/YYYY).");
+        if (!isValidDate(fields_[2])) throw invalid_argument("Ngay lap khong hop le (DD/MM/YYYY).");
+        if (!isPositiveNum(fields_[3])) throw invalid_argument("Tong tien phai > 0.");
+        string st = fields_[4];
+        if (st != "Chua thanh toan" && st != "Da thanh toan" && st != "Qua han")
+            throw invalid_argument("Trang thai phai la: Chua thanh toan, Da thanh toan, Qua han.");
+    }
+};
 
-DEFINE_ENTITY(Contract, "Hop dong",
-    "Ma khach hang", "Ma goi", "Ngay ky", "Ngay het han", "Trang thai")
+class Payment : public Entity {
+public:
+    Payment() : Entity("Thanh toan", {
+        "Ma hoa don", "Ngay thanh toan", "So tien", "Phuong thuc", "Trang thai"
+    }) {}
 
-DEFINE_ENTITY(Renewal, "Gia han dich vu",
-    "Ma hop dong", "Ngay gia han", "So thang", "So tien")
+    string getInvoiceId() const { return fields_[0]; }
+    string getStatus() const { return fields_[4]; }
 
-DEFINE_ENTITY(Payment, "Thanh toan",
-    "Ma hoa don", "Ngay thanh toan", "So tien", "Phuong thuc", "Trang thai")
+    void validate() const override {
+        if (!isValidCode(id_, "TT")) throw invalid_argument("Ma thanh toan phai co dang TTxxx.");
+        if (!isValidCode(fields_[0], "HD")) throw invalid_argument("Ma hoa don tham chieu phai co dang HDxxx.");
+        if (!isValidDate(fields_[1])) throw invalid_argument("Ngay thanh toan khong hop le (DD/MM/YYYY).");
+        if (!isPositiveNum(fields_[2])) throw invalid_argument("So tien phai > 0.");
+        string m = fields_[3], st = fields_[4];
+        if (m != "Tien mat" && m != "Chuyen khoan" && m != "Vi dien tu" && m != "The")
+            throw invalid_argument("Phuong thuc thanh toan khong hop le.");
+        if (st != "Thanh cong" && st != "Dang xu ly" && st != "Hoan tien")
+            throw invalid_argument("Trang thai thanh toan khong hop le.");
+    }
+};
 
-DEFINE_ENTITY(Invoice, "Hoa don cuoc",
-    "Ma khach hang", "Ky cuoc", "Ngay lap", "Tong tien", "Trang thai")
-
-DEFINE_ENTITY(Incident, "Su co Internet",
-    "Ma khach hang", "Thoi diem bao", "Mo ta", "Muc do", "Trang thai")
-
-DEFINE_ENTITY(Support, "Ho tro ky thuat",
-    "Ma su co", "Ma nhan vien", "Ngay tiep nhan", "Ket qua", "Trang thai")
-
-#undef DEFINE_ENTITY
-
-// ============================================================
-// 3. REPOSITORY<T> - KHUNG LUU TRU DUNG CHUNG
-//    CRUD co ban duoc cung cap; rang buoc nghiep vu do thanh vien bo sung.
-// ============================================================
+/* --- LOP KHUON MAU QUAN LY FILE REPOSITORY --- */
 template <class T>
 class Repository {
-private:
     vector<T> items_;
-    string filePath_;
-
+    string path_;
 public:
-    explicit Repository(string filePath) : filePath_(move(filePath)) {
-        filesystem::path path(filePath_);
-        if (path.has_parent_path())
-            filesystem::create_directories(path.parent_path());
-
-        if (!filesystem::exists(path)) {
-            ofstream create(filePath_);
-            if (!create) throw runtime_error("Khong tao duoc file: " + filePath_);
-        }
-        load();
-    }
-
-    void load() {
-        items_.clear();
-        ifstream input(filePath_);
-        if (!input) throw runtime_error("Khong mo duoc file: " + filePath_);
-
+    Repository(string path) : path_(path) {
+        ifstream in(path_.c_str());
+        if (!in) { ofstream out(path_.c_str()); return; }
         string line;
-        while (getline(input, line)) {
+        while (getline(in, line)) {
             if (line.empty()) continue;
             T item;
             if (item.parse(line)) items_.push_back(item);
-            else cerr << "Canh bao: bo qua dong loi trong " << filePath_ << '\n';
         }
     }
 
     void save() const {
-        ofstream output(filePath_, ios::trunc);
-        if (!output) throw runtime_error("Khong ghi duoc file: " + filePath_);
-        for (const auto& item : items_) output << item.serialize() << '\n';
-        if (!output) throw runtime_error("Loi khi ghi file: " + filePath_);
+        ofstream out(path_.c_str(), ios::trunc);
+        for (size_t i = 0; i < items_.size(); ++i)
+            out << items_[i].serialize() << '\n';
     }
 
     vector<T>& all() { return items_; }
-    const vector<T>& all() const { return items_; }
 
     T* findById(const string& id) {
-        auto it = find_if(items_.begin(), items_.end(),
-            [&](const T& item) { return item.getId() == id; });
-        return it == items_.end() ? nullptr : &(*it);
+        for (size_t i = 0; i < items_.size(); ++i)
+            if (items_[i] == id) return &items_[i];
+        return NULL;
     }
 
-    // Cac ham CRUD co ban. Bo sung kiem tra tham chieu o use case truoc khi xoa.
-    bool add(const T& item) {
-        if (findById(item.getId())) return false;
-        items_.push_back(item);
-        save();
-        return true;
-    }
-
-    bool update(const string& id, const T& updated) {
-        T* current = findById(id);
-        if (!current) return false;
-        *current = updated; // Ma cu duoc giu nguyen o lop giao dien.
-        save();
-        return true;
-    }
+    void add(const T& item) { items_.push_back(item); save(); }
 
     bool removeById(const string& id) {
-        auto oldSize = items_.size();
-        items_.erase(remove_if(items_.begin(), items_.end(),
-            [&](const T& item) { return item.getId() == id; }), items_.end());
-        if (items_.size() == oldSize) return false;
-        save();
-        return true;
+        for (size_t i = 0; i < items_.size(); ++i) {
+            if (items_[i] == id) {
+                items_.erase(items_.begin() + i);
+                save();
+                return true;
+            }
+        }
+        return false;
     }
 
     void showAll() const {
-        if (items_.empty()) {
-            cout << "Danh sach rong.\n";
-            return;
-        }
-
+        if (items_.empty()) { cout << "Danh sach rong.\n"; return; }
+        const vector<string>& lbs = items_[0].getLabels();
         cout << left << setw(14) << "MA DINH DANH";
-        for (const auto& label : items_.front().fieldNames())
-            cout << left << setw(22) << label;
-        cout << '\n' << string(14 + 22 * items_.front().fieldNames().size(), '-') << '\n';
-
-        for (const auto& item : items_) item.displayRow();
+        for (size_t i = 0; i < lbs.size(); ++i) cout << left << setw(22) << lbs[i];
+        cout << '\n' << string(14 + 22 * lbs.size(), '-') << '\n';
+        for (size_t i = 0; i < items_.size(); ++i) {
+            const Entity* e = &items_[i]; // Goi da hinh qua con tro lop co so
+            e->displayRow();
+        }
         cout << "Tong so ban ghi: " << items_.size() << '\n';
     }
-
-    // TODO NGHIEP VU: them ham tim kiem theo ten/trang thai neu use case can.
 };
 
-// ============================================================
-// 4. KHAI BAO REPOSITORY - MOI DOI TUONG MOT FILE RIENG
-// ============================================================
+/* --- DU LIEU CHUNG CUA UNG DUNG --- */
 struct AppData {
     Repository<Customer> customers{"data/khach_hang.txt"};
     Repository<Registration> registrations{"data/dang_ky.txt"};
@@ -279,69 +278,113 @@ struct AppData {
     Repository<Support> supports{"data/ho_tro_ky_thuat.txt"};
 };
 
-// ============================================================
-// 5. KHUON MENU USE CASE
-//    Menu chi goi den ham xu ly. Thanh vien viet cac ham nghiep vu
-//    va noi vao cac case TODO duoi day.
-// ============================================================
-int readChoice(const string& prompt, int minValue, int maxValue) {
+/* --- CAC MENU KHUNG VA MENU NGHIEP VU --- */
+void menuCustomers(AppData&) { cout << "\n[KHUNG] Quan ly khach hang.\n"; }
+void menuRegistrations(AppData&) { cout << "\n[KHUNG] Dang ky dich vu.\n"; }
+void menuPlans(AppData&) { cout << "\n[KHUNG] Quan ly goi cuoc.\n"; }
+void menuPlanChanges(AppData&) { cout << "\n[KHUNG] Chuyen doi goi cuoc.\n"; }
+void menuContracts(AppData&) { cout << "\n[KHUNG] Quan ly hop dong.\n"; }
+void menuRenewals(AppData&) { cout << "\n[KHUNG] Gia han dich vu.\n"; }
+void menuIncidents(AppData&) { cout << "\n[KHUNG] Su co Internet.\n"; }
+void menuSupports(AppData&) { cout << "\n[KHUNG] Ho tro ky thuat.\n"; }
+
+void syncInvoiceStatus(AppData& app, const string& invId) {
+    Invoice* inv = app.invoices.findById(invId);
+    if (!inv) return;
+    bool paid = false;
+    for (size_t i = 0; i < app.payments.all().size(); ++i)
+        if (app.payments.all()[i].getInvoiceId() == invId &&
+            app.payments.all()[i].getStatus() == "Thanh cong") paid = true;
+    inv->setStatus(paid ? "Da thanh toan" : "Chua thanh toan");
+    app.invoices.save();
+}
+
+void menuPayments(AppData& app) {
     while (true) {
-        cout << prompt;
-        int choice;
-        if (cin >> choice && choice >= minValue && choice <= maxValue) {
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            return choice;
-        }
-        cout << "Lua chon khong hop le, vui long nhap lai.\n";
-        cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << "\n===== QUAN LY THANH TOAN (UC 7) =====\n"
+             << "1. Them\n2. Xem danh sach\n3. Sua\n4. Xoa\n0. Quay lai\n";
+        int ch = readChoice("Chon: ", 0, 4);
+        if (ch == 0) return;
+        try {
+            if (ch == 1) {
+                Payment p; p.inputNew();
+                if (app.payments.findById(p.getId())) throw invalid_argument("Ma dinh danh da ton tai.");
+                if (!app.invoices.findById(p.getInvoiceId())) throw invalid_argument("Ma hoa don khong ton tai.");
+                app.payments.add(p);
+                syncInvoiceStatus(app, p.getInvoiceId());
+                cout << "Them thanh cong.\n";
+            } else if (ch == 2) {
+                app.payments.showAll();
+            } else if (ch == 3) {
+                Payment* cur = app.payments.findById(readLine("Ma can sua: "));
+                if (!cur) { cout << "Khong tim thay ban ghi.\n"; continue; }
+                string oldInv = cur->getInvoiceId();
+                Payment upd = *cur; upd.updateFields();
+                if (!app.invoices.findById(upd.getInvoiceId())) throw invalid_argument("Ma hoa don khong ton tai.");
+                *cur = upd; app.payments.save();
+                syncInvoiceStatus(app, oldInv); syncInvoiceStatus(app, upd.getInvoiceId());
+                cout << "Cap nhat thanh cong.\n";
+            } else if (ch == 4) {
+                Payment* cur = app.payments.findById(readLine("Ma can xoa: "));
+                if (!cur) { cout << "Khong tim thay ban ghi.\n"; continue; }
+                cur->displayRow();
+                string invId = cur->getInvoiceId();
+                string ans = readLine("Xac nhan xoa (y/n): ");
+                if (ans == "y" || ans == "Y") {
+                    app.payments.removeById(cur->getId());
+                    syncInvoiceStatus(app, invId);
+                    cout << "Xoa thanh cong.\n";
+                }
+            }
+        } catch (const exception& e) { cout << "[Loi] " << e.what() << '\n'; }
     }
 }
 
-// TODO: Moi thanh vien cai dat cac ham xu ly use case cua minh.
-// Goi y CRUD toi thieu: them, hien thi danh sach, tim/xem chi tiet,
-// cap nhat (Enter giu nguyen, khong sua ma), xoa (xac nhan va kiem tra lien ket).
-// Vi du:
-// void manageCustomers(AppData& app) { ... }
-// void managePlans(AppData& app) { ... }
+void menuInvoices(AppData& app) {
+    while (true) {
+        cout << "\n===== QUAN LY HOA DON CUOC (UC 8) =====\n"
+             << "1. Them\n2. Xem danh sach\n3. Sua\n4. Xoa\n0. Quay lai\n";
+        int ch = readChoice("Chon: ", 0, 4);
+        if (ch == 0) return;
+        try {
+            if (ch == 1) {
+                Invoice inv; inv.inputNew();
+                if (app.invoices.findById(inv.getId())) throw invalid_argument("Ma dinh danh da ton tai.");
+                if (!app.customers.all().empty() && !app.customers.findById(inv.getCustomerId()))
+                    throw invalid_argument("Ma khach hang khong ton tai.");
+                app.invoices.add(inv);
+                cout << "Them thanh cong.\n";
+            } else if (ch == 2) {
+                app.invoices.showAll();
+            } else if (ch == 3) {
+                Invoice* cur = app.invoices.findById(readLine("Ma can sua: "));
+                if (!cur) { cout << "Khong tim thay ban ghi.\n"; continue; }
+                Invoice upd = *cur; upd.updateFields();
+                if (!app.customers.all().empty() && !app.customers.findById(upd.getCustomerId()))
+                    throw invalid_argument("Ma khach hang khong ton tai.");
+                *cur = upd; app.invoices.save();
+                syncInvoiceStatus(app, cur->getId());
+                cout << "Cap nhat thanh cong.\n";
+            } else if (ch == 4) {
+                Invoice* cur = app.invoices.findById(readLine("Ma can xoa: "));
+                if (!cur) { cout << "Khong tim thay ban ghi.\n"; continue; }
+                for (size_t i = 0; i < app.payments.all().size(); ++i)
+                    if (app.payments.all()[i].getInvoiceId() == cur->getId())
+                        throw invalid_argument("Hoa don dang duoc giao dich thanh toan tham chieu.");
+                cur->displayRow();
+                string ans = readLine("Xac nhan xoa (y/n): ");
+                if (ans == "y" || ans == "Y") {
+                    app.invoices.removeById(cur->getId());
+                    cout << "Xoa thanh cong.\n";
+                }
+            }
+        } catch (const exception& e) { cout << "[Loi] " << e.what() << '\n'; }
+    }
+}
 
-void menuCustomers(AppData&) {
-    cout << "\n[KHUNG] Quan ly khach hang - thanh vien phu trach bo sung CRUD.\n";
-}
-void menuRegistrations(AppData&) {
-    cout << "\n[KHUNG] Dang ky dich vu - thanh vien phu trach bo sung CRUD/nghiep vu.\n";
-}
-void menuPlans(AppData&) {
-    cout << "\n[KHUNG] Quan ly goi cuoc - thanh vien phu trach bo sung CRUD.\n";
-}
-void menuPlanChanges(AppData&) {
-    cout << "\n[KHUNG] Chuyen doi goi cuoc - thanh vien phu trach bo sung CRUD/nghiep vu.\n";
-}
-void menuContracts(AppData&) {
-    cout << "\n[KHUNG] Quan ly hop dong - thanh vien phu trach bo sung CRUD/nghiep vu.\n";
-}
-void menuRenewals(AppData&) {
-    cout << "\n[KHUNG] Gia han dich vu - thanh vien phu trach bo sung CRUD/nghiep vu.\n";
-}
-void menuPayments(AppData&) {
-    cout << "\n[KHUNG] Thanh toan - thanh vien phu trach bo sung CRUD/nghiep vu.\n";
-}
-void menuInvoices(AppData&) {
-    cout << "\n[KHUNG] Hoa don cuoc - thanh vien phu trach bo sung CRUD/nghiep vu.\n";
-}
-void menuIncidents(AppData&) {
-    cout << "\n[KHUNG] Su co Internet - thanh vien phu trach bo sung CRUD/nghiep vu.\n";
-}
-void menuSupports(AppData&) {
-    cout << "\n[KHUNG] Ho tro ky thuat - thanh vien phu trach bo sung CRUD/nghiep vu.\n";
-}
-
-// ============================================================
-// 6. MENU CHINH - KHUNG TICH HOP CUA CA NHOM
-// ============================================================
 int runApplication() {
+    system("mkdir data 2>nul");
     AppData app;
-
     while (true) {
         cout << "\n" << string(58, '=') << '\n'
              << "          HE THONG QUAN LY DICH VU FTTH\n"
@@ -358,7 +401,6 @@ int runApplication() {
              << "10. Ho tro ky thuat\n"
              << " 0. Thoat chuong trinh\n"
              << string(58, '-') << '\n';
-
         int choice = readChoice("Chon: ", 0, 10);
         switch (choice) {
             case 1: menuCustomers(app); break;
@@ -376,11 +418,9 @@ int runApplication() {
     }
 }
 
-} // namespace FTTH
-
 int main() {
     try {
-        return FTTH::runApplication();
+        return runApplication();
     } catch (const exception& error) {
         cerr << "Loi chuong trinh: " << error.what() << '\n';
         return 1;
