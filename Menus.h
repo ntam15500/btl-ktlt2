@@ -9,16 +9,28 @@
 #include <algorithm>
 #include <filesystem>
 #include <limits>
+#include <stdexcept>
 using namespace std;
 
-// --- CÁC HÀM TIỆN ÍCH DÙNG CHUNG ---
-inline string readLine(const string& p) { string s; cout << p; getline(cin, s); return s; }
+inline string readLine(const string& p) {
+    string s; cout << p;
+    if (!getline(cin, s)) throw runtime_error("Ket thuc dau vao (EOF).");
+    return s;
+}
 
 inline int readChoice(const string& p, int mn, int mx) {
-    int c; while (cout << p && (!(cin >> c) || c < mn || c > mx)) {
-        cout << "Nhap lai (" << mn << "-" << mx << ").\n";
-        cin.clear(); cin.ignore(numeric_limits<streamsize>::max(), '\n');
-    } cin.ignore(numeric_limits<streamsize>::max(), '\n'); return c;
+    int c;
+    while (true) {
+        cout << p;
+        if (cin >> c) {
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            if (c >= mn && c <= mx) return c;
+        } else {
+            if (cin.eof()) throw runtime_error("Ket thuc dau vao (EOF).");
+            cin.clear(); cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        }
+        cout << "Lua chon khong hop le, vui long nhap " << mn << "-" << mx << ".\n";
+    }
 }
 
 inline int readUCChoice(const string& p, int mn, int mx) { return readChoice(p, mn, mx); }
@@ -26,17 +38,20 @@ inline int readUCChoice(const string& p, int mn, int mx) { return readChoice(p, 
 inline string readUCText(const string& p, bool req = true) {
     while (true) {
         string s = readLine(p);
-        if (!req || !s.empty()) return s;
-        cout << "Khong duoc de trong!\n";
+        if (req && s.find_first_not_of(" \t\r") == string::npos) { cout << "Khong duoc de trong!\n"; continue; }
+        if (s.find('|') != string::npos) { cout << "Khong duoc nhap ky tu |.\n"; continue; }
+        return s;
     }
 }
 
-inline bool confirmUC() {
-    string a = readLine("Xac nhan thuc hien? (y/n): ");
-    return a == "y" || a == "Y";
+inline bool confirmUC() { string a = readLine("Xac nhan thuc hien? (y/n): "); return a == "y" || a == "Y"; }
+
+inline bool splitPipe(const string& line, string* t, int n) {
+    stringstream ss(line); string extra;
+    for (int i = 0; i < n; ++i) if (!getline(ss, t[i], '|')) return false;
+    return !getline(ss, extra, '|');
 }
 
-// Lớp cơ sở Entity
 class Entity {
 public:
     string id;
@@ -48,7 +63,6 @@ public:
     virtual bool fromFileString(const string& line) = 0;
 };
 
-// --- CÁC LỚP THỰC THỂ (CÓ ĐỦ GETTER ĐỂ TƯƠNG THÍCH CÁC FILE UC) ---
 class Customer : public Entity {
 public:
     string fullName, phone, cccd, address, contact;
@@ -57,16 +71,12 @@ public:
     string getCccd() const { return cccd; }
     void inputNew() { id = readLine("Ma KH: "); fullName = readLine("Ho ten: "); phone = readLine("SDT: "); cccd = readLine("CCCD: "); address = readLine("Dia chi: "); contact = readLine("Lien he: "); }
     void updateFields() {
-        string s = readLine("Ho ten [" + fullName + "]: "); if(!s.empty()) fullName = s;
-        s = readLine("SDT [" + phone + "]: "); if(!s.empty()) phone = s;
+        string s = readLine("Ho ten [" + fullName + "]: "); if (!s.empty()) fullName = s;
+        s = readLine("SDT [" + phone + "]: "); if (!s.empty()) phone = s;
     }
-    void displayRow() const override { cout << left << setw(10) << id << setw(20) << fullName << setw(15) << phone << setw(15) << cccd << setw(20) << address << "\n"; }
+    void displayRow() const override { cout << left << setw(10) << id << setw(22) << fullName << setw(14) << phone << setw(15) << cccd << setw(25) << address << setw(20) << contact << "\n"; }
     string toFileString() const override { return id + "|" + fullName + "|" + phone + "|" + cccd + "|" + address + "|" + contact; }
-    bool fromFileString(const string& line) override {
-        stringstream ss(line); string t[6];
-        for(int i=0; i<6; ++i) if(!getline(ss, t[i], '|')) return false;
-        id = t[0]; fullName = t[1]; phone = t[2]; cccd = t[3]; address = t[4]; contact = t[5]; return true;
-    }
+    bool fromFileString(const string& l) override { string t[6]; if (!splitPipe(l, t, 6)) return false; id = t[0]; fullName = t[1]; phone = t[2]; cccd = t[3]; address = t[4]; contact = t[5]; return true; }
 };
 
 class Registration : public Entity {
@@ -78,11 +88,7 @@ public:
     void updateFields() { status = readLine("Trang thai [" + status + "]: "); }
     void displayRow() const override { cout << left << setw(10) << id << setw(10) << customerId << setw(10) << planId << setw(12) << regDate << setw(15) << status << "\n"; }
     string toFileString() const override { return id + "|" + customerId + "|" + planId + "|" + regDate + "|" + status; }
-    bool fromFileString(const string& line) override {
-        stringstream ss(line); string t[5];
-        for(int i=0; i<5; ++i) if(!getline(ss, t[i], '|')) return false;
-        id = t[0]; customerId = t[1]; planId = t[2]; regDate = t[3]; status = t[4]; return true;
-    }
+    bool fromFileString(const string& l) override { string t[5]; if (!splitPipe(l, t, 5)) return false; id = t[0]; customerId = t[1]; planId = t[2]; regDate = t[3]; status = t[4]; return true; }
 };
 
 class Plan : public Entity {
@@ -91,28 +97,20 @@ public:
     string getName() const { return name; }
     void inputNew() { id = readLine("Ma goi: "); name = readLine("Ten goi: "); speed = readLine("Toc do: "); price = readLine("Gia: "); duration = readLine("Thoi han: "); }
     void updateFields() {
-        string s = readLine("Ten [" + name + "]: "); if(!s.empty()) name = s;
-        s = readLine("Gia [" + price + "]: "); if(!s.empty()) price = s;
+        string s = readLine("Ten [" + name + "]: "); if (!s.empty()) name = s;
+        s = readLine("Gia [" + price + "]: "); if (!s.empty()) price = s;
     }
-    void displayRow() const override { cout << left << setw(10) << id << setw(20) << name << setw(10) << price << "\n"; }
+    void displayRow() const override { cout << left << setw(12) << id << setw(22) << name << setw(16) << speed << setw(18) << price << setw(15) << duration << "\n"; }
     string toFileString() const override { return id + "|" + name + "|" + speed + "|" + price + "|" + duration; }
-    bool fromFileString(const string& line) override {
-        stringstream ss(line); string t[5];
-        for(int i=0; i<5; ++i) if(!getline(ss, t[i], '|')) return false;
-        id = t[0]; name = t[1]; speed = t[2]; price = t[3]; duration = t[4]; return true;
-    }
+    bool fromFileString(const string& l) override { string t[5]; if (!splitPipe(l, t, 5)) return false; id = t[0]; name = t[1]; speed = t[2]; price = t[3]; duration = t[4]; return true; }
 };
 
 class PlanChange : public Entity {
 public:
     string contractId, oldPlanId, newPlanId, date, status = "Da thuc hien";
-    void displayRow() const override { cout << left << setw(10) << id << setw(10) << contractId << setw(15) << newPlanId << setw(12) << date << "\n"; }
+    void displayRow() const override { cout << left << setw(10) << id << setw(10) << contractId << setw(15) << newPlanId << setw(12) << date << setw(15) << status << "\n"; }
     string toFileString() const override { return id + "|" + contractId + "|" + oldPlanId + "|" + newPlanId + "|" + date + "|" + status; }
-    bool fromFileString(const string& line) override {
-        stringstream ss(line); string t[6];
-        for(int i=0; i<6; ++i) if(!getline(ss, t[i], '|')) return false;
-        id = t[0]; contractId = t[1]; oldPlanId = t[2]; newPlanId = t[3]; date = t[4]; status = t[5]; return true;
-    }
+    bool fromFileString(const string& l) override { string t[6]; if (!splitPipe(l, t, 6)) return false; id = t[0]; contractId = t[1]; oldPlanId = t[2]; newPlanId = t[3]; date = t[4]; status = t[5]; return true; }
 };
 
 class Contract : public Entity {
@@ -127,29 +125,28 @@ public:
     void setStatus(const string& s) { status = s; }
     void inputNew() { id = readLine("Ma HD: "); customerId = readLine("Ma KH: "); planId = readLine("Ma goi: "); startDate = readLine("Ngay BD: "); endDate = readLine("Ngay KT: "); }
     void updateFields() { status = readLine("Trang thai [" + status + "]: "); }
-    void displayRow() const override { cout << left << setw(10) << id << setw(10) << customerId << setw(10) << planId << setw(15) << status << "\n"; }
+    void displayRow() const override { cout << left << setw(10) << id << setw(10) << customerId << setw(10) << planId << setw(12) << endDate << setw(15) << status << "\n"; }
     string toFileString() const override { return id + "|" + customerId + "|" + planId + "|" + startDate + "|" + endDate + "|" + status; }
-    bool fromFileString(const string& line) override {
-        stringstream ss(line); string t[6];
-        for(int i=0; i<6; ++i) if(!getline(ss, t[i], '|')) return false;
-        id = t[0]; customerId = t[1]; planId = t[2]; startDate = t[3]; endDate = t[4]; status = t[5]; return true;
-    }
+    bool fromFileString(const string& l) override { string t[6]; if (!splitPipe(l, t, 6)) return false; id = t[0]; customerId = t[1]; planId = t[2]; startDate = t[3]; endDate = t[4]; status = t[5]; return true; }
 };
 
 class Renewal : public Entity {
 public:
-    string contractId, oldEnd, newEnd, status = "Thanh cong";
-    int months = 1;
+    string contractId, oldEnd, newEnd, status = "Thanh cong"; int months = 1;
     string getContractId() const { return contractId; }
     string getNewEndDate() const { return newEnd; }
     void inputNew(const string& cId, const string& curEnd) { id = readLine("Ma GH: "); contractId = cId; oldEnd = curEnd; newEnd = readLine("Ngay moi: "); }
-    void updateFields() {}
+    void updateFields() {
+        string s = readLine("Ngay KT moi [" + newEnd + "]: "); if (!s.empty()) newEnd = s;
+        s = readLine("So thang [" + to_string(months) + "]: ");
+        if (!s.empty()) { try { int n = stoi(s); if (n > 0 && n <= 120) months = n; } catch (...) {} }
+    }
     void displayRow() const override { cout << left << setw(10) << id << setw(10) << contractId << setw(12) << newEnd << "\n"; }
     string toFileString() const override { return id + "|" + contractId + "|" + oldEnd + "|" + newEnd + "|" + to_string(months) + "|" + status; }
-    bool fromFileString(const string& line) override {
-        stringstream ss(line); string t[6];
-        for(int i=0; i<6; ++i) if(!getline(ss, t[i], '|')) return false;
-        id = t[0]; contractId = t[1]; oldEnd = t[2]; newEnd = t[3]; months = stoi(t[4]); status = t[5]; return true;
+    bool fromFileString(const string& l) override {
+        string t[6]; if (!splitPipe(l, t, 6)) return false;
+        size_t p = 0; int m = stoi(t[4], &p); if (p != t[4].size() || m <= 0 || m > 120) return false;
+        id = t[0]; contractId = t[1]; oldEnd = t[2]; newEnd = t[3]; months = m; status = t[5]; return true;
     }
 };
 
@@ -160,13 +157,9 @@ public:
     string getStatus() const { return status; }
     void inputNew() { id = readLine("Ma TT: "); invoiceId = readLine("Ma HDuoc: "); amount = readLine("So tien: "); }
     void updateFields() { status = readLine("Trang thai [" + status + "]: "); }
-    void displayRow() const override { cout << left << setw(10) << id << setw(10) << invoiceId << setw(10) << amount << "\n"; }
+    void displayRow() const override { cout << left << setw(10) << id << setw(10) << invoiceId << setw(12) << amount << setw(15) << status << "\n"; }
     string toFileString() const override { return id + "|" + invoiceId + "|" + amount + "|" + status; }
-    bool fromFileString(const string& line) override {
-        stringstream ss(line); string t[4];
-        for(int i=0; i<4; ++i) if(!getline(ss, t[i], '|')) return false;
-        id = t[0]; invoiceId = t[1]; amount = t[2]; status = t[3]; return true;
-    }
+    bool fromFileString(const string& l) override { string t[4]; if (!splitPipe(l, t, 4)) return false; id = t[0]; invoiceId = t[1]; amount = t[2]; status = t[3]; return true; }
 };
 
 class Invoice : public Entity {
@@ -177,13 +170,9 @@ public:
     void setStatus(const string& s) { status = s; }
     void inputNew() { id = readLine("Ma HDuoc: "); customerId = readLine("Ma KH: "); amount = readLine("So tien: "); }
     void updateFields() { status = readLine("Trang thai [" + status + "]: "); }
-    void displayRow() const override { cout << left << setw(10) << id << setw(10) << customerId << setw(10) << amount << setw(15) << status << "\n"; }
+    void displayRow() const override { cout << left << setw(10) << id << setw(10) << customerId << setw(12) << amount << setw(15) << status << "\n"; }
     string toFileString() const override { return id + "|" + customerId + "|" + amount + "|" + status; }
-    bool fromFileString(const string& line) override {
-        stringstream ss(line); string t[4];
-        for(int i=0; i<4; ++i) if(!getline(ss, t[i], '|')) return false;
-        id = t[0]; customerId = t[1]; amount = t[2]; status = t[3]; return true;
-    }
+    bool fromFileString(const string& l) override { string t[4]; if (!splitPipe(l, t, 4)) return false; id = t[0]; customerId = t[1]; amount = t[2]; status = t[3]; return true; }
 };
 
 class Incident : public Entity {
@@ -191,13 +180,9 @@ public:
     string contractId, customerId, desc, status = "Moi tiep nhan";
     void inputNew(const string& cId = "", const string& custId = "") { id = readLine("Ma SC: "); contractId = cId; customerId = custId; desc = readLine("Mo ta: "); }
     void updateFields() { status = readLine("Trang thai [" + status + "]: "); }
-    void displayRow() const override { cout << left << setw(10) << id << setw(10) << contractId << setw(20) << desc << setw(10) << status << "\n"; }
+    void displayRow() const override { cout << left << setw(10) << id << setw(10) << contractId << setw(20) << desc << setw(15) << status << "\n"; }
     string toFileString() const override { return id + "|" + contractId + "|" + customerId + "|" + desc + "|" + status; }
-    bool fromFileString(const string& line) override {
-        stringstream ss(line); string t[5];
-        for(int i=0; i<5; ++i) if(!getline(ss, t[i], '|')) return false;
-        id = t[0]; contractId = t[1]; customerId = t[2]; desc = t[3]; status = t[4]; return true;
-    }
+    bool fromFileString(const string& l) override { string t[5]; if (!splitPipe(l, t, 5)) return false; id = t[0]; contractId = t[1]; customerId = t[2]; desc = t[3]; status = t[4]; return true; }
 };
 
 class Support : public Entity {
@@ -205,39 +190,35 @@ public:
     string customerId, incidentId, technician, note, history, status = "Cho phan cong";
     void inputNew() { id = readLine("Ma HT: "); customerId = readLine("Ma KH: "); incidentId = readLine("Ma SC: "); note = readLine("Ghi chu: "); }
     void updateFields() { technician = readLine("KTV: "); }
-    void displayRow() const override { cout << left << setw(10) << id << setw(10) << customerId << setw(15) << status << "\n"; }
+    void displayRow() const override { cout << left << setw(10) << id << setw(10) << customerId << setw(15) << status << history << "\n"; }
     string toFileString() const override { return id + "|" + customerId + "|" + incidentId + "|" + technician + "|" + note + "|" + history + "|" + status; }
-    bool fromFileString(const string& line) override {
-        stringstream ss(line); string t[7];
-        for(int i=0; i<7; ++i) if(!getline(ss, t[i], '|')) return false;
-        id = t[0]; customerId = t[1]; incidentId = t[2]; technician = t[3]; note = t[4]; history = t[5]; status = t[6]; return true;
-    }
+    bool fromFileString(const string& l) override { string t[7]; if (!splitPipe(l, t, 7)) return false; id = t[0]; customerId = t[1]; incidentId = t[2]; technician = t[3]; note = t[4]; history = t[5]; status = t[6]; return true; }
 };
 
-// Repository<T> quản lý file tự động
 template <typename T>
 class Repository {
-    vector<T> v;
-    string path;
+    vector<T> v; string path;
 public:
     explicit Repository(const string& p = "") : path(p) { load(); }
     void load() {
-        v.clear(); filesystem::create_directories("data");
-        ifstream in(path); if(!in.is_open()) return;
-        string line;
-        while(getline(in, line)) {
-            if(line.empty() || line[0] == '#') continue;
-            T obj; if(obj.fromFileString(line)) v.push_back(obj);
+        v.clear(); if (path.empty()) return;
+        filesystem::create_directories("data");
+        if (!filesystem::exists(path)) { ofstream(path); return; }
+        ifstream in(path); string line;
+        while (getline(in, line)) {
+            if (line.empty() || line[0] == '#') continue;
+            T obj; try { if (obj.fromFileString(line) && !obj.getId().empty()) v.push_back(obj); } catch (...) {}
         }
     }
     void save() const {
+        if (path.empty()) return;
         filesystem::create_directories("data");
-        ofstream out(path);
-        for(const auto& x : v) out << x.toFileString() << "\n";
+        ofstream out(path, ios::trunc);
+        for (const auto& x : v) out << x.toFileString() << "\n";
     }
     T* findById(const string& id) {
-        auto it = find_if(v.begin(), v.end(), [&](const T& x){ return x.getId() == id; });
-        return (it != v.end()) ? &(*it) : nullptr;
+        for (auto& x : v) if (x.getId() == id) return &x;
+        return nullptr;
     }
     vector<T>& all() { return v; }
     void add(const T& x) { v.push_back(x); save(); }
@@ -246,8 +227,8 @@ public:
         save();
     }
     void showAll() const {
-        if(v.empty()) { cout << "(Trong)\n"; return; }
-        for(const auto& x : v) static_cast<const Entity*>(&x)->displayRow();
+        if (v.empty()) { cout << "(Trong)\n"; return; }
+        for (const auto& x : v) x.displayRow();
     }
 };
 
