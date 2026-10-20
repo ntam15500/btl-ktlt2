@@ -1,10 +1,9 @@
 #include "Menus.h"
 
-
 void menuCustomers(AppData& app) {
     while (true) {
         cout << "\n" << string(58, '=') << '\n'
-             << "                 QUAN LY KHACH HANG\n"
+             << "             QUAN LY KHACH HANG (UC1)\n"
              << string(58, '=') << '\n'
              << " 1. Danh sach khach hang\n"
              << " 2. Them khach hang moi\n"
@@ -19,7 +18,7 @@ void menuCustomers(AppData& app) {
 
         switch (choice) {
             case 1: {
-                cout << "\n" << left
+                cout << "\n--- DANH SACH KHACH HANG ---\n" << left
                      << setw(10) << "Ma KH"
                      << setw(22) << "Ho ten"
                      << setw(14) << "SDT"
@@ -34,11 +33,11 @@ void menuCustomers(AppData& app) {
                 Customer c;
                 c.inputNew();
                 if (app.customers.findById(c.getId()) != nullptr) {
-                    cout << "Loi: Ma khach hang da ton tai!\n";
+                    cout << "[Loi] Ma khach hang da ton tai!\n";
                 } else {
                     app.customers.add(c);
                     app.customers.save();
-                    cout << "Them khach hang thanh cong!\n";
+                    cout << "=> Them khach hang thanh cong!\n";
                 }
                 break;
             }
@@ -50,7 +49,7 @@ void menuCustomers(AppData& app) {
                 } else {
                     c->updateFields();
                     app.customers.save();
-                    cout << "Cap nhat thanh cong!\n";
+                    cout << "=> Cap nhat khach hang thanh cong!\n";
                 }
                 break;
             }
@@ -61,7 +60,7 @@ void menuCustomers(AppData& app) {
                 } else {
                     app.customers.removeById(id);
                     app.customers.save();
-                    cout << "Da xoa khach hang!\n";
+                    cout << "=> Da xoa khach hang thanh cong!\n";
                 }
                 break;
             }
