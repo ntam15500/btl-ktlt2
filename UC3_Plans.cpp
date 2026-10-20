@@ -1,8 +1,9 @@
 #include "Menus.h"
+
 void menuPlans(AppData& app) {
     while (true) {
         cout << "\n" << string(58, '=') << '\n'
-             << "                  QUAN LY GOI CUOC\n"
+             << "               QUAN LY GOI CUOC (UC3)\n"
              << string(58, '=') << '\n'
              << " 1. Danh sach goi cuoc\n"
              << " 2. Them goi cuoc moi\n"
@@ -17,7 +18,7 @@ void menuPlans(AppData& app) {
 
         switch (choice) {
             case 1: {
-                cout << "\n" << left
+                cout << "\n--- DANH SACH GOI CUOC ---\n" << left
                      << setw(12) << "Ma Goi"
                      << setw(22) << "Ten Goi"
                      << setw(16) << "Toc Do"
@@ -31,11 +32,11 @@ void menuPlans(AppData& app) {
                 Plan p;
                 p.inputNew();
                 if (app.plans.findById(p.getId()) != nullptr) {
-                    cout << "Loi: Ma goi cuoc da ton tai!\n";
+                    cout << "[Loi] Ma goi cuoc da ton tai!\n";
                 } else {
                     app.plans.add(p);
                     app.plans.save();
-                    cout << "Them goi cuoc thanh cong!\n";
+                    cout << "=> Them goi cuoc thanh cong!\n";
                 }
                 break;
             }
@@ -47,7 +48,7 @@ void menuPlans(AppData& app) {
                 } else {
                     p->updateFields();
                     app.plans.save();
-                    cout << "Cap nhat goi cuoc thanh cong!\n";
+                    cout << "=> Cap nhat goi cuoc thanh cong!\n";
                 }
                 break;
             }
@@ -58,7 +59,7 @@ void menuPlans(AppData& app) {
                 } else {
                     app.plans.removeById(id);
                     app.plans.save();
-                    cout << "Da xoa goi cuoc!\n";
+                    cout << "=> Da xoa goi cuoc thanh cong!\n";
                 }
                 break;
             }
