@@ -1,43 +1,31 @@
 #include "Menus.h"
-
 const string& Incident::getContractId() const {
-    return contractId_;
-}
+    return contractId_;}
 const string& Incident::getCustomerId() const {
-    return customerId_;
-}
+    return customerId_;}
 const string& Incident::getStatus() const {
-    return status_;
-}
+    return status_;}
 void Incident::setContractId(const string& value) {
-    contractId_ = checkedText(value, "Ma hop dong");
-}
+    contractId_ = checkedText(value, "Ma hop dong");}
 void Incident::setCustomerId(const string& value) {
-    customerId_ = checkedText(value, "Ma khach hang");
-}
+    customerId_ = checkedText(value, "Ma khach hang");}
 void Incident::setDescription(const string& value) {
-    description_ = checkedText(value, "Mo ta su co");
-}
+    description_ = checkedText(value, "Mo ta su co");}
 void Incident::setStatus(const string& value) {
-    status_ = checkedText(value, "Trang thai su co");
-}
-
+    status_ = checkedText(value, "Trang thai su co");}
 void Incident::inputNew(const string& contractId, const string& customerId) {
     setId(readUCText("Ma SC: "));
     setContractId(contractId.empty() ? readUCText("Ma HD: ") : contractId);
     setCustomerId(customerId.empty() ? readUCText("Ma KH: ") : customerId);
-    setDescription(readUCText("Mo ta: "));
-}
-
+    setDescription(readUCText("Mo ta: "));}
 void Incident::updateFields() {
     updateOptionalField("Mo ta [" + description_ + "]: ", [this](const string& v) {
         setDescription(v);
-    });
+ });
     updateOptionalField("Trang thai [" + status_ + "]: ", [this](const string& v) {
         setStatus(v);
     });
 }
-
 void Incident::displayRow() const {
     displayCells({
         {getId(), 10},
@@ -46,11 +34,9 @@ void Incident::displayRow() const {
         {status_, 15}
     });
 }
-
 string Incident::toFileString() const {
     return getId() + "|" + contractId_ + "|" + customerId_ + "|" + description_ + "|" + status_;
 }
-
 bool Incident::fromFileString(const string& line) {
     string fields[5];
     return parseEntityRecord(line, fields, 5, [this](const string* values) {
@@ -61,7 +47,6 @@ bool Incident::fromFileString(const string& line) {
         setStatus(values[4]);
     });
 }
-
 void menuIncidents(AppData& app) {
     while (true) {
         cout << "\n" << string(58, '=') << '\n'
@@ -73,10 +58,8 @@ void menuIncidents(AppData& app) {
              << " 4. Xoa su co\n"
              << " 0. Quay lai\n"
              << string(58, '-') << '\n';
-
         int chon = readChoice("Chon: ", 0, 4);
         if (chon == 0) return;
-
         try {
             if (chon == 1) {
                 cout << "\n--- DANH SACH SU CO INTERNET ---\n";
@@ -96,7 +79,6 @@ void menuIncidents(AppData& app) {
                 if (hopDong->getStatus() == "Da huy") {
                     throw invalid_argument("Hop dong da huy, khong the bao su co!");
                 }
-
                 Incident sc;
                 sc.inputNew(maHd, hopDong->getCustomerId());
 
@@ -115,10 +97,8 @@ void menuIncidents(AppData& app) {
                     cout << "Khong tim thay su co nay!\n";
                     continue;
                 }
-
                 cout << "Thong tin hien tai: ";
                 sc->displayRow();
-
                 sc->updateFields();
                 app.incidents.save();
                 cout << "=> Cap nhat su co thanh cong!\n";
@@ -126,12 +106,10 @@ void menuIncidents(AppData& app) {
             else if (chon == 4) {
                 string maXoa = readLine("Nhap ma su co can xoa: ");
                 Incident* sc = app.incidents.findById(maXoa);
-
                 if (sc == nullptr) {
                     cout << "Khong tim thay su co can xoa!\n";
                     continue;
                 }
-
                 sc->displayRow();
                 string xacNhan = readLine("Xac nhan xoa (y/n): ");
                 if (xacNhan == "y" || xacNhan == "Y") {
