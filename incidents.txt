@@ -1,0 +1,10 @@
+SC001|HD001|KH001|Mat ket noi mang tai nha khach hang 1|Moi tiep nhan
+SC002|HD002|KH002|Mat ket noi mang tai nha khach hang 2|Moi tiep nhan
+SC003|HD003|KH003|Mat ket noi mang tai nha khach hang 3|Moi tiep nhan
+SC004|HD004|KH004|Mat ket noi mang tai nha khach hang 4|Moi tiep nhan
+SC005|HD005|KH005|Mat ket noi mang tai nha khach hang 5|Moi tiep nhan
+SC006|HD006|KH006|Mat ket noi mang tai nha khach hang 6|Moi tiep nhan
+SC007|HD007|KH007|Mat ket noi mang tai nha khach hang 7|Moi tiep nhan
+SC008|HD008|KH008|Mat ket noi mang tai nha khach hang 8|Moi tiep nhan
+SC009|HD009|KH009|Mat ket noi mang tai nha khach hang 9|Moi tiep nhan
+SC010|HD010|KH010|Mat ket noi mang tai nha khach hang 10|Moi tiep nhan

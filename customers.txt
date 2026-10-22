@@ -1,0 +1,11 @@
+KH001|Nguyen Van An|0912345001|001201000001|Cau Giay, Ha Noi|an.nguyen@example.com
+KH002|Tran Thi Binh|0912345002|001201000002|Dong Da, Ha Noi|binh.tran@example.com
+KH003|Le Minh Chau|0912345003|001201000003|Hai Ba Trung, Ha Noi|chau.le@example.com
+KH004|Pham Quang Dung|0912345004|001201000004|Ha Dong, Ha Noi|dung.pham@example.com
+KH005|Hoang Thu Ha|0912345005|001201000005|Long Bien, Ha Noi|ha.hoang@example.com
+KH006|Do Tuan Kiet|0912345006|001201000006|Nam Tu Liem, Ha Noi|kiet.do@example.com
+KH007|Vu Ngoc Lan|0912345007|001201000007|Thanh Xuan, Ha Noi|lan.vu@example.com
+KH008|Bui Duc Minh|0912345008|001201000008|Gia Lam, Ha Noi|minh.bui@example.com
+KH009|Dang Phuong Nga|0912345009|001201000009|Bac Tu Liem, Ha Noi|nga.dang@example.com
+KH010|Ngo Hoang Phuc|0912345010|001201000010|Hoang Mai, Ha Noi|phuc.ngo@example.com
+213|4235|5467|4657|4657|

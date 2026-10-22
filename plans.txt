@@ -1,0 +1,10 @@
+GOI001|FTTH Co ban|100 Mbps|180000|30 ngay
+GOI002|FTTH Tieu chuan|200 Mbps|230000|30 ngay
+GOI003|FTTH Gia dinh|300 Mbps|280000|30 ngay
+GOI004|FTTH Cao cap|500 Mbps|350000|30 ngay
+GOI005|FTTH Gaming|600 Mbps|400000|30 ngay
+GOI006|FTTH Sinh vien|150 Mbps|160000|30 ngay
+GOI007|FTTH Doanh nghiep S|700 Mbps|550000|30 ngay
+GOI008|FTTH Doanh nghiep M|900 Mbps|750000|30 ngay
+GOI009|FTTH Sieu toc|1000 Mbps|900000|30 ngay
+GOI010|FTTH VIP|1200 Mbps|1200000|30 ngay

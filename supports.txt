@@ -1,0 +1,10 @@
+HT001|KH001|SC001|Ky thuat vien 1|Da tiep nhan yeu cau|Tiep nhan yeu cau|Cho phan cong
+HT002|KH002|SC002|Ky thuat vien 2|Da tiep nhan yeu cau|Tiep nhan yeu cau|Cho phan cong
+HT003|KH003|SC003|Ky thuat vien 3|Da tiep nhan yeu cau|Tiep nhan yeu cau|Cho phan cong
+HT004|KH004|SC004|Ky thuat vien 4|Da tiep nhan yeu cau|Tiep nhan yeu cau|Cho phan cong
+HT005|KH005|SC005|Ky thuat vien 5|Da tiep nhan yeu cau|Tiep nhan yeu cau|Cho phan cong
+HT006|KH006|SC006|Ky thuat vien 6|Da tiep nhan yeu cau|Tiep nhan yeu cau|Cho phan cong
+HT007|KH007|SC007|Ky thuat vien 7|Da tiep nhan yeu cau|Tiep nhan yeu cau|Cho phan cong
+HT008|KH008|SC008|Ky thuat vien 8|Da tiep nhan yeu cau|Tiep nhan yeu cau|Cho phan cong
+HT009|KH009|SC009|Ky thuat vien 9|Da tiep nhan yeu cau|Tiep nhan yeu cau|Cho phan cong
+HT010|KH010|SC010|Ky thuat vien 10|Da tiep nhan yeu cau|Tiep nhan yeu cau|Cho phan cong

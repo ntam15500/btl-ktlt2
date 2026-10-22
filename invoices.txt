@@ -1,0 +1,10 @@
+HDON001|KH001|180000|Chua thanh toan
+HDON002|KH002|230000|Chua thanh toan
+HDON003|KH003|280000|Chua thanh toan
+HDON004|KH004|330000|Chua thanh toan
+HDON005|KH005|380000|Chua thanh toan
+HDON006|KH006|430000|Chua thanh toan
+HDON007|KH007|480000|Chua thanh toan
+HDON008|KH008|530000|Chua thanh toan
+HDON009|KH009|580000|Chua thanh toan
+HDON010|KH010|630000|Chua thanh toan
