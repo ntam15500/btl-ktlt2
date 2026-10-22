@@ -4,10 +4,8 @@
 // Tac gia: [Dien ho ten sinh vien phu trach]
 #include "Validator.h"
 #include <iostream>
-#include <sstream>
 #include <string>
 #include <stdexcept>
-#include <limits>
 
 /// Doc mot dong tu ban phim va bao loi neu dau vao ket thuc bat ngo.
 inline std::string readLine(const std::string& prompt) {
@@ -15,6 +13,10 @@ inline std::string readLine(const std::string& prompt) {
     std::cout << prompt;
     if (!std::getline(std::cin, value)) {
         throw std::runtime_error("Ket thuc dau vao (EOF).");
+    }
+    // Loai bo ky tu '\r' neu dau vao bi anh huong boi dinh dang CRLF
+    if (!value.empty() && value.back() == '\r') {
+        value.pop_back();
     }
     return value;
 }
@@ -48,34 +50,35 @@ inline std::string readUCPositiveNumber(const std::string& prompt) {
     }
 }
 
-/// Cap nhat truong tuy chon; de trong de giu gia tri cu va nhap lai neu sai.
+/// Cap nhat truong tuy chon; bam Enter ngay de giu gia tri cu, nhap sai se yeu cau nhap lai.
 template <typename Setter>
 inline void updateOptionalField(const std::string& prompt, Setter setter) {
     while (true) {
-        const std::string value = trimText(readLine(prompt));
-        if (value.empty()) return;
+        const std::string rawValue = readLine(prompt);
+        if (rawValue.empty()) return; // Chi giu nguyen khi nguoi dung bam Enter ngay
         try {
-            setter(value);
+            setter(trimText(rawValue));
             return;
         } catch (const std::exception& error) {
-            std::cout << error.what() << " Vui long nhap lai hoac de trong de giu nguyen.\n";
+            std::cout << error.what() << " Vui long nhap lai hoac bam Enter de giu nguyen.\n";
         }
     }
 }
 
-/// Doc lua chon so nguyen trong khoang cho phep (An toan voi du lieu hon hop).
+/// Doc lua chon so nguyen trong khoang cho phep.
 inline int readChoice(const std::string& prompt, int minValue, int maxValue) {
     while (true) {
         const std::string line = trimText(readLine(prompt));
-        try {
-            std::size_t pos = 0;
-            int choice = std::stoi(line, &pos);
-            // Dam bao toan bo chuoi deu la so (khong co ky tu la phia sau nhu "1abc")
-            if (pos == line.length() && choice >= minValue && choice <= maxValue) {
-                return choice;
+        if (!line.empty()) {
+            try {
+                std::size_t pos = 0;
+                int choice = std::stoi(line, &pos);
+                if (pos == line.length() && choice >= minValue && choice <= maxValue) {
+                    return choice;
+                }
+            } catch (const std::exception&) {
+                // Bat loi std::invalid_argument va std::out_of_range cua stoi
             }
-        } catch (const std::exception&) {
-            // Bo qua loi stoi va in thong bao ben duoi
         }
         std::cout << "Lua chon khong hop le, vui long nhap so nguyen tu "
                   << minValue << " den " << maxValue << ".\n";
@@ -90,7 +93,7 @@ inline int readUCChoice(const std::string& prompt, int minValue, int maxValue) {
 /// Yeu cau xac nhan bang y/n va chi chap nhan hai gia tri nay.
 inline bool confirmUC() {
     while (true) {
-        std::string answer = trimText(readLine("Xac nhan thuc hien? (y/n): "));
+        const std::string answer = trimText(readLine("Xac nhan thuc hien? (y/n): "));
         if (answer == "y" || answer == "Y") return true;
         if (answer == "n" || answer == "N") return false;
         std::cout << "Vui long nhap y hoac n.\n";
@@ -98,9 +101,17 @@ inline bool confirmUC() {
 }
 
 /// Tach mot dong du lieu theo dau | va kiem tra chinh xac so truong.
-inline bool splitPipe(const std::string& line, std::string* fields, int count) {
-    if (count <= 0) return line.empty();
-    
+inline bool splitPipe(const std::string& rawLine, std::string* fields, int count) {
+    if (count <= 0 || fields == nullptr || rawLine.empty()) {
+        return false;
+    }
+
+    // Xu ly ky tu '\r' cuoi dong neu doc tu file Windows tren Linux/macOS
+    std::string line = rawLine;
+    if (!line.empty() && line.back() == '\r') {
+        line.pop_back();
+    }
+
     std::size_t start = 0;
     for (int i = 0; i < count - 1; ++i) {
         std::size_t pos = line.find('|', start);
@@ -108,12 +119,12 @@ inline bool splitPipe(const std::string& line, std::string* fields, int count) {
         fields[i] = line.substr(start, pos - start);
         start = pos + 1;
     }
-    
-    // Kiem tra xem con dau '|' nao bi du o phan cuoi khong
+
+    // Neu van con dau '|' phia sau -> Du truong
     if (line.find('|', start) != std::string::npos) {
-        return false; // Du truong
+        return false;
     }
-    
+
     fields[count - 1] = line.substr(start);
     return true;
 }
