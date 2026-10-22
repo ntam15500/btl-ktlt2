@@ -1,8 +1,9 @@
 #ifndef ENTITIES_H
 #define ENTITIES_H
-// Tac gia: [Dien ho ten sinh vien]
+// Tac gia: Nguyen Duc Tam
 
 #include "InputHelper.h"
+#include <iostream>
 #include <iomanip>
 #include <string>
 #include <stdexcept>
@@ -76,11 +77,15 @@ public:
     const string& getFullName() const;
     const string& getPhone() const;
     const string& getCccd() const;
+    const string& getAddress() const { return address_; }
+    const string& getContact() const { return contact_; }
+
     void setFullName(const string& value);
     void setPhone(const string& value);
     void setCccd(const string& value);
     void setAddress(const string& value);
     void setContact(const string& value);
+
     void inputNew();
     void updateFields();
     void displayRow() const override;
@@ -97,11 +102,14 @@ private:
 public:
     const string& getCustomerId() const;
     const string& getPlanId() const;
+    const string& getRegDate() const { return regDate_; }
     const string& getStatus() const;
+
     void setCustomerId(const string& value);
     void setPlanId(const string& value);
     void setRegDate(const string& value);
     void setStatus(const string& value);
+
     void inputNew();
     void updateFields();
     void displayRow() const override;
@@ -117,10 +125,15 @@ private:
     string duration_;
 public:
     const string& getName() const;
+    const string& getSpeed() const { return speed_; }
+    const string& getPrice() const { return price_; }
+    const string& getDuration() const { return duration_; }
+
     void setName(const string& value);
     void setSpeed(const string& value);
     void setPrice(const string& value);
     void setDuration(const string& value);
+
     void inputNew();
     void updateFields();
     void displayRow() const override;
@@ -141,11 +154,13 @@ public:
     const string& getNewPlanId() const;
     const string& getDate() const;
     const string& getStatus() const;
+
     void setContractId(const string& value);
     void setOldPlanId(const string& value);
     void setNewPlanId(const string& value);
     void setDate(const string& value);
     void setStatus(const string& value);
+
     void inputNew();
     void updateFields();
     void displayRow() const override;
@@ -166,11 +181,13 @@ public:
     const string& getStartDate() const;
     const string& getEndDate() const;
     const string& getStatus() const;
+
     void setCustomerId(const string& value);
     void setPlanId(const string& value);
     void setStartDate(const string& value);
     void setEndDate(const string& value);
     void setStatus(const string& value);
+
     void inputNew();
     void updateFields();
     void displayRow() const override;
@@ -187,13 +204,17 @@ private:
     int months_ = 1;
 public:
     const string& getContractId() const;
+    const string& getOldEndDate() const { return oldEnd_; }
     const string& getNewEndDate() const;
     const string& getStatus() const;
+    int getMonths() const { return months_; }
+
     void setContractId(const string& value);
     void setOldEndDate(const string& value);
     void setNewEndDate(const string& value);
     void setStatus(const string& value);
     void setMonths(int value);
+
     void inputNew(const string& contractId, const string& currentEndDate);
     void updateFields();
     void displayRow() const override;
@@ -208,10 +229,13 @@ private:
     string status_ = "Thanh cong";
 public:
     const string& getInvoiceId() const;
+    const string& getAmount() const { return amount_; }
     const string& getStatus() const;
+
     void setInvoiceId(const string& value);
     void setAmount(const string& value);
     void setStatus(const string& value);
+
     void inputNew();
     void updateFields();
     void displayRow() const override;
@@ -226,10 +250,13 @@ private:
     string status_ = "Chua thanh toan";
 public:
     const string& getCustomerId() const;
+    const string& getAmount() const { return amount_; }
     const string& getStatus() const;
+
     void setCustomerId(const string& value);
     void setAmount(const string& value);
     void setStatus(const string& value);
+
     void inputNew();
     void updateFields();
     void displayRow() const override;
@@ -246,11 +273,14 @@ private:
 public:
     const string& getContractId() const;
     const string& getCustomerId() const;
+    const string& getDescription() const { return description_; }
     const string& getStatus() const;
+
     void setContractId(const string& value);
     void setCustomerId(const string& value);
     void setDescription(const string& value);
     void setStatus(const string& value);
+
     void inputNew(const string& contractId = "", const string& customerId = "");
     void updateFields();
     void displayRow() const override;
@@ -273,16 +303,19 @@ public:
     const string& getNote() const;
     const string& getHistory() const;
     const string& getStatus() const;
+
     void setCustomerId(const string& value);
     void setIncidentId(const string& value);
     void setTechnician(const string& value);
     void setNote(const string& value);
     void setHistory(const string& value);
     void setStatus(const string& value);
+
     void inputNew();
     void updateFields();
     void displayRow() const override;
     string toFileString() const override;
     bool fromFileString(const string& line) override;
 };
+
 #endif // ENTITIES_H
